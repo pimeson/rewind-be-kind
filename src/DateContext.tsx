@@ -7,17 +7,18 @@ interface IDateContext {
   year: string
   days: Weekday[]
 }
+
 interface IDateHandlersContext{
   incrementWeek: () => void
   decrementWeek: () => void
   setMood: (mood: Mood, date: Date) => void
   setFeeling: (mood: Mood, descriptor: string[], date: Date) => void
+  expungeFeeling: (feeling: string, date: Date) => void
 }
 
 export type Weekday = {
   weekday: string;
   date: Date;
-  isToday: boolean;
   log: Log | null;
 };
 
@@ -28,9 +29,9 @@ export type Log = {
 };
 
 export enum Mood {
-  happy,
-  neutral,
-  sad,
+  happy = "happy",
+  neutral = "neutral",
+  sad = "sad",
 }
 
 export const daysOfTheWeek = [
@@ -64,7 +65,6 @@ const makeWeekdays = (startDate: Date, logs: { [day: string]: Log }) => {
       {
         weekday,
         date,
-        isToday: todayIndex === index,
         log: existingLog,
       },
     ];
@@ -114,6 +114,20 @@ export function DateProvider({ children }: PropsWithChildren<any>) {
     });
   };
 
+  const expungeFeeling = (feeling: string, date: Date) => {
+    const formattedDate = format(date, 'yyyy-MM-dd')
+    const prevLog = dailyLogs[formattedDate]
+    const {[feeling]: prevFeeling, ...rest} = prevLog.feelings
+
+    setDailyLogs({
+      ...dailyLogs,
+      [formattedDate]: {
+        ...prevLog,
+        feelings: rest,
+      },
+    });
+  };
+
   const [startingDate, setStartingDate] = useState<Date>(new Date())
 
   function decrementWeek(){
@@ -139,7 +153,8 @@ export function DateProvider({ children }: PropsWithChildren<any>) {
         decrementWeek,
         incrementWeek,
         setMood,
-        setFeeling
+        setFeeling,
+        expungeFeeling
       }}>
         {children}
       </DateHandlersContext.Provider>
