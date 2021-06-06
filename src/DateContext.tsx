@@ -11,6 +11,7 @@ interface IDateHandlersContext{
   incrementWeek: () => void
   decrementWeek: () => void
   setMood: (mood: Mood, date: Date) => void
+  setFeeling: (mood: Mood, descriptor: string[], date: Date) => void
 }
 
 export type Weekday = {
@@ -21,6 +22,7 @@ export type Weekday = {
 };
 
 export type Log = {
+  feelings: {[feeling: string]: Mood};
   mood: Mood;
   date: string;
 };
@@ -90,8 +92,24 @@ export function DateProvider({ children }: PropsWithChildren<any>) {
     setDailyLogs({
       ...dailyLogs,
       [format(date, 'yyyy-MM-dd')]: {
+        ...dailyLogs[format(date, 'yyyy-MM-dd')],
         mood,
         date: format(date, 'yyyy-MM-dd'),
+      },
+    });
+  };
+
+  const setFeeling = (mood: Mood, descriptors: string[], date: Date) => {
+    const formattedDate = format(date, 'yyyy-MM-dd')
+    const prevLog = dailyLogs[formattedDate]
+    const prevFeelings = prevLog?.feelings ?? {}
+    const feelings = descriptors.reduce<{[feeling: string]: Mood}>((acc, d) => ({ ...acc, [d]: mood }), prevFeelings)
+
+    setDailyLogs({
+      ...dailyLogs,
+      [formattedDate]: {
+        ...prevLog,
+        feelings,
       },
     });
   };
@@ -120,7 +138,8 @@ export function DateProvider({ children }: PropsWithChildren<any>) {
       <DateHandlersContext.Provider value={{
         decrementWeek,
         incrementWeek,
-        setMood
+        setMood,
+        setFeeling
       }}>
         {children}
       </DateHandlersContext.Provider>

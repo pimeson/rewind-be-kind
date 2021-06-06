@@ -12,7 +12,7 @@ interface WeekProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export default function Week({ month, year, ...props }: WeekProps) {
   return (
-    <StyledWeek className="px-6 md:px-12" {...props}>
+    <StyledWeek className="px-6 md:px-12 mb-5" {...props}>
       <h1 className="font-bold uppercase font text-2xl text-blue-600 opacity-70">
         {month} <span className="text-gray-500">{year}</span>
       </h1>

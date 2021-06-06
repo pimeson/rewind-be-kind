@@ -21,6 +21,7 @@ const StyledMoodBtn = styled.button<{ log: Log | null; mood: Mood }>`
 interface DayProps extends React.HTMLAttributes<HTMLDivElement> {
   day: Weekday;
   setMood: (mood: Mood, date: Date) => void;
+  setFeeling: (mood: Mood, descriptor: string[], date: Date) => void
 }
 
 interface MoodProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -47,9 +48,9 @@ function MoodBtn({ log, mood, onClick, children, currentMood }: MoodProps) {
   );
 }
 
-export default function Day({ day, setMood, ...defaultProps }: DayProps) {
+export default function Day({ day, setMood, setFeeling, ...defaultProps }: DayProps) {
   const { className: overrideClassNames } = defaultProps;
-  const { weekday, isToday, date, log } = day;
+  const { weekday, date, log } = day;
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [currentMood, setCurrentMood] = useState<Mood | null>(null);
   const [descriptors, setDescriptors] = useState<{descriptor: string, mood: Mood}[]>([]);
@@ -59,7 +60,7 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
     ? overrideClassNames
     : 'flex flex-col bg-white h-96 rounded-lg shadow-md';
 
-  if (isToday) {
+  if (date.getDate() === new Date().getDate()) {
     className += ' border-4 border-red-700 border-opacity-25';
   }
 
@@ -75,9 +76,9 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
     e.preventDefault();
 
     if (descriptorInput.current && currentMood !== null) {
-      const newDescriptors = descriptorInput.current.value.split(',').map(descriptor => ({mood: currentMood, descriptor}))
+      const newDescriptors = descriptorInput.current.value.split(',')
       descriptorInput.current.value = ''
-      setDescriptors([...descriptors, ...newDescriptors])
+      setFeeling(currentMood, newDescriptors, date)
     }
   };
 
@@ -150,15 +151,15 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
         </form>
       )}
       <div className="flex-1" />
-      {descriptors && (
+      {log?.feelings && (
         <p className="justify-end m-3 flex flex-wrap">
-          {descriptors.map((description) =>{ 
+          {Object.entries(log.feelings).map(([descriptor, mood]) =>{
             return (
             <span
-              key={description.descriptor}
-              className={`text-xs  rounded-full ml-2 py-2 px-3 ${moodMap[description.mood]}`}
+              key={descriptor}
+              className={`text-xs  rounded-full ml-2 py-2 px-3 ${moodMap[mood]}`}
             >
-              {description.descriptor}
+              {descriptor}
             </span>
           )})}
         </p>
