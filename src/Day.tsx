@@ -26,10 +26,11 @@ interface MoodProps extends React.HTMLAttributes<HTMLDivElement> {
   log: Log | null;
   onClick: () => void;
   mood: Mood;
+  currentMood: Mood | null;
 }
 
-function MoodBtn({ log, mood, onClick, children }: MoodProps) {
-  const isActive = log?.mood === mood;
+function MoodBtn({ log, mood, onClick, children, currentMood }: MoodProps) {
+  const isActive = currentMood === mood;
 
   return (
     <StyledMoodBtn
@@ -49,7 +50,8 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
   const { className: overrideClassNames } = defaultProps;
   const { weekday, isToday, date, log } = day;
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [descriptors, setDescriptors] = useState<string[] | null>(null);
+  const [currentMood, setCurrentMood] = useState<Mood | null>(null);
+  const [descriptors, setDescriptors] = useState<{descriptor: string, mood: Mood}[]>([]);
   const descriptorInput = useRef<HTMLInputElement>(null);
 
   let className = overrideClassNames
@@ -61,7 +63,8 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
   }
 
   const handleMood = (mood: Mood, date: Date) => {
-    setMood(mood, date);
+    // setMood(mood, date);
+    setCurrentMood(mood)
 
     setIsFormVisible(true);
     descriptorInput.current && descriptorInput.current.focus();
@@ -70,10 +73,18 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
   const handleDescriptorSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (descriptorInput.current) {
-      setDescriptors(descriptorInput.current.value.split(','));
+    if (descriptorInput.current && currentMood !== null) {
+      const newDescriptors = descriptorInput.current.value.split(',').map(descriptor => ({mood: currentMood, descriptor}))
+      descriptorInput.current.value = ''
+      setDescriptors([...descriptors, ...newDescriptors])
     }
   };
+
+  const moodMap = {
+    [Mood.happy]: 'bg-green-100 text-green-400',
+    [Mood.neutral]: 'bg-yellow-100 text-yellow-400',
+    [Mood.sad]: 'bg-blue-100 text-blue-400',
+  }
 
   return (
     <StyledDay
@@ -94,6 +105,7 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
       <div className="mood-panel">
         <MoodBtn
           log={log}
+          currentMood={currentMood}
           onClick={() => handleMood(Mood.sad, date)}
           mood={Mood.sad}
         >
@@ -101,6 +113,7 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
         </MoodBtn>
         <MoodBtn
           log={log}
+          currentMood={currentMood}
           onClick={() => handleMood(Mood.neutral, date)}
           mood={Mood.neutral}
         >
@@ -108,6 +121,7 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
         </MoodBtn>
         <MoodBtn
           log={log}
+          currentMood={currentMood}
           onClick={() => handleMood(Mood.happy, date)}
           mood={Mood.happy}
         >
@@ -136,15 +150,16 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
       )}
       <div className="flex-1" />
       {descriptors && (
-        <p className="justify-end m-3">
-          {descriptors.map((description) => (
+        <p className="justify-end m-3 flex flex-wrap">
+          {descriptors.map((description) =>{ 
+            return (
             <span
-              key={description}
-              className="text-xs bg-green-100 rounded-full ml-2 py-2 px-3 text-green-400"
+              key={description.descriptor}
+              className={`text-xs  rounded-full ml-2 py-2 px-3 ${moodMap[description.mood]}`}
             >
-              {description}
+              {description.descriptor}
             </span>
-          ))}
+          )})}
         </p>
       )}
     </StyledDay>
