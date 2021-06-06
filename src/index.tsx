@@ -1,10 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
+import { DateProvider } from './DateContext';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <DateProvider>
+     <App />
+    </DateProvider>
   </React.StrictMode>,
   document.getElementById('root'),
 );

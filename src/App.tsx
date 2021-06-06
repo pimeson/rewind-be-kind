@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import './App.css';
 import styled from 'styled-components';
-import { add, format } from 'date-fns';
 import Day from './Day';
 import Week from './Week';
+import { daysOfTheWeek, useDate, useDateHandlers } from './DateContext';
 
 interface AppProps {}
 
@@ -23,52 +23,11 @@ const StyledApp = styled.div`
   }
 `;
 
-export type Weekday = {
-  weekday: string;
-  date: Date;
-  isToday: boolean;
-  log: Log | null;
-};
-
-export const daysOfTheWeek = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday',
-];
-
 const indexByDay = Object.entries(daysOfTheWeek).reduce<{
   [day: string]: number;
 }>((map, [index, day]) => {
   return { ...map, [day]: Number(index) };
 }, {});
-
-const makeWeekdays = (logs: { [day: string]: Log }) => {
-  const today = new Date();
-
-  const weekday = format(today, 'eeee');
-  const todayIndex = indexByDay[weekday];
-
-  return Object.entries(indexByDay).reduce((days, [weekday, index]) => {
-    const date = add(today, {
-      days: index - todayIndex,
-    });
-    const existingLog = logs?.[format(date, 'yyyy-MM-dd')] ?? null;
-
-    return [
-      ...days,
-      {
-        weekday,
-        date,
-        isToday: todayIndex === index,
-        log: existingLog,
-      },
-    ];
-  }, [] as Weekday[]);
-};
 
 const makePrompt = (todayIndex: number) => {
   if (todayIndex <= 2) return 'Ready for the week?';
@@ -76,48 +35,21 @@ const makePrompt = (todayIndex: number) => {
   return 'How was your week?';
 };
 
-export enum Mood {
-  happy,
-  neutral,
-  sad,
-}
-
-export type Log = {
-  mood: Mood;
-  date: string;
-};
-
 function App({}: AppProps) {
-  const today = new Date();
-  const weekday = format(today, 'eeee');
-  const month = format(today, 'MMMM');
-  const year = format(today, 'yyyy');
-  const todayIndex = indexByDay[weekday];
-  const [dailyLogs, setDailyLogs] = useState<{ [dateStamp: string]: Log }>({});
+  const {
+    weekday,
+    month,
+    year,
+    days
+  } = useDate()
 
-  // App will play a replay of your week based off of the flexible goals that you have set for yourself.
-  useEffect(() => {
-    const previousRecords = localStorage.getItem('records');
-    if (previousRecords) {
-      setDailyLogs(JSON.parse(previousRecords));
-    }
-  }, []);
+  const {
+    incrementWeek,
+    decrementWeek,
+    setMood
+  } = useDateHandlers()
 
-  useEffect(() => {
-    localStorage.setItem('records', JSON.stringify(dailyLogs));
-  }, [dailyLogs]);
-
-  const setMood = (mood: Mood, date: Date) => {
-    setDailyLogs({
-      ...dailyLogs,
-      [format(date, 'yyyy-MM-dd')]: {
-        mood,
-        date: format(date, 'yyyy-MM-dd'),
-      },
-    });
-  };
-
-  const days = makeWeekdays(dailyLogs);
+  const dayIndex = indexByDay[weekday];
 
   return (
     <StyledApp className="bg-gray-100 antialiased text-gray-800">
@@ -134,8 +66,11 @@ function App({}: AppProps) {
       </div>
 
       <h3 className="subtitle text-center mt-14 text-lg opacity-60 text-gray-600">
-        {makePrompt(todayIndex)}
+        {makePrompt(dayIndex)}
+       
       </h3>
+      <button onClick={decrementWeek}>{'<'}</button>
+      <button onClick={incrementWeek}>{'>'}</button>
       <Week month={month} year={year}>
         {days.map((day) => (
           <Day setMood={setMood} key={day.weekday} day={day} />

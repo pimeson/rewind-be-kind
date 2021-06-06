@@ -1,8 +1,9 @@
 import React, { FormEvent, useEffect, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import styled from 'styled-components';
-import type { Log, Weekday } from './App';
-import { Mood } from './App';
+import type { Log, Weekday} from './DateContext';
+import { Mood } from './DateContext';
+
 
 const StyledDay = styled.div`
   .mood-panel {
