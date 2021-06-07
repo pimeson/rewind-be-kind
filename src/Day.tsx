@@ -1,8 +1,14 @@
-import React, { FormEvent, useEffect, useRef, useState } from 'react';
-import { format } from 'date-fns';
+import React, { FormEvent, useRef, useState } from 'react';
+import { format, isToday } from 'date-fns';
 import styled from 'styled-components';
-import type { Log, Weekday } from './App';
-import { Mood } from './App';
+import type { Log, Weekday} from './DateContext';
+import { Mood } from './DateContext';
+
+const moodMap = {
+  [Mood.happy]: 'bg-green-100 text-green-400',
+  [Mood.neutral]: 'bg-yellow-100 text-yellow-400',
+  [Mood.sad]: 'bg-blue-100 text-blue-400',
+}
 
 const StyledDay = styled.div`
   .mood-panel {
@@ -20,16 +26,19 @@ const StyledMoodBtn = styled.button<{ log: Log | null; mood: Mood }>`
 interface DayProps extends React.HTMLAttributes<HTMLDivElement> {
   day: Weekday;
   setMood: (mood: Mood, date: Date) => void;
+  setFeeling: (mood: Mood, descriptor: string[], date: Date) => void
+  expungeFeeling: (feeling: string, date: Date) => void;
 }
 
 interface MoodProps extends React.HTMLAttributes<HTMLDivElement> {
   log: Log | null;
   onClick: () => void;
   mood: Mood;
+  currentMood: Mood | null;
 }
 
-function MoodBtn({ log, mood, onClick, children }: MoodProps) {
-  const isActive = log?.mood === mood;
+function MoodBtn({ log, mood, onClick, children, currentMood }: MoodProps) {
+  const isActive = currentMood === mood;
 
   return (
     <StyledMoodBtn
@@ -45,23 +54,24 @@ function MoodBtn({ log, mood, onClick, children }: MoodProps) {
   );
 }
 
-export default function Day({ day, setMood, ...defaultProps }: DayProps) {
+export default function Day({ day, setMood, setFeeling, expungeFeeling, ...defaultProps }: DayProps) {
   const { className: overrideClassNames } = defaultProps;
-  const { weekday, isToday, date, log } = day;
+  const { weekday, date, log } = day;
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [descriptors, setDescriptors] = useState<string[] | null>(null);
+  const [currentMood, setCurrentMood] = useState<Mood | null>(null);
   const descriptorInput = useRef<HTMLInputElement>(null);
 
   let className = overrideClassNames
     ? overrideClassNames
     : 'flex flex-col bg-white h-96 rounded-lg shadow-md';
 
-  if (isToday) {
+  if (isToday(date)) {
     className += ' border-4 border-red-700 border-opacity-25';
   }
 
   const handleMood = (mood: Mood, date: Date) => {
-    setMood(mood, date);
+    // setMood(mood, date);
+    setCurrentMood(mood)
 
     setIsFormVisible(true);
     descriptorInput.current && descriptorInput.current.focus();
@@ -70,8 +80,10 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
   const handleDescriptorSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (descriptorInput.current) {
-      setDescriptors(descriptorInput.current.value.split(','));
+    if (descriptorInput.current && currentMood !== null) {
+      const newDescriptors = descriptorInput.current.value.split(',')
+      descriptorInput.current.value = ''
+      setFeeling(currentMood, newDescriptors, date)
     }
   };
 
@@ -82,6 +94,7 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
         const currentTarget = e.currentTarget;
         window.setTimeout(() => {
           if (!currentTarget.contains(document.activeElement)) {
+            setCurrentMood(null)
             setIsFormVisible(false);
           }
         }, 100);
@@ -91,9 +104,10 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
       <h2 className="text-center font-semibold text-gray-600 p-3">
         {format(date, 'd').toUpperCase()}
       </h2>
-      <div className="mood-panel">
+      <div className="mood-panel h-12">
         <MoodBtn
           log={log}
+          currentMood={currentMood}
           onClick={() => handleMood(Mood.sad, date)}
           mood={Mood.sad}
         >
@@ -101,6 +115,7 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
         </MoodBtn>
         <MoodBtn
           log={log}
+          currentMood={currentMood}
           onClick={() => handleMood(Mood.neutral, date)}
           mood={Mood.neutral}
         >
@@ -108,6 +123,7 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
         </MoodBtn>
         <MoodBtn
           log={log}
+          currentMood={currentMood}
           onClick={() => handleMood(Mood.happy, date)}
           mood={Mood.happy}
         >
@@ -123,7 +139,7 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
             className="tracking-tighter text-sm font-medium text-gray-500 ml-0.5"
             htmlFor={`day-descriptor-${weekday}`}
           >
-            How would you describe your day?
+            {`Why did you feel ${currentMood} ${isToday(date) ? 'today' : `on ${weekday}`}?`}
           </label>
           <input
             autoFocus
@@ -135,18 +151,36 @@ export default function Day({ day, setMood, ...defaultProps }: DayProps) {
         </form>
       )}
       <div className="flex-1" />
-      {descriptors && (
-        <p className="justify-end m-3">
-          {descriptors.map((description) => (
-            <span
-              key={description}
-              className="text-xs bg-green-100 rounded-full ml-2 py-2 px-3 text-green-400"
-            >
-              {description}
-            </span>
-          ))}
+      {log?.feelings && (
+        <p className="justify-end m-3 flex flex-wrap">
+          {Object.entries(log.feelings).map(([descriptor, mood]) => {
+            return <FeelingChip key={descriptor} expungeFeeling={() => {expungeFeeling(descriptor, date)}} descriptor={descriptor} mood={mood} />
+          })}
         </p>
       )}
     </StyledDay>
   );
+}
+
+interface FeelingChipProps {
+  descriptor: string;
+  mood: Mood;
+  expungeFeeling: () => void;
+}
+
+function FeelingChip({descriptor, mood, expungeFeeling}: FeelingChipProps) {
+  const [isHover, setIsHover] = useState(false)
+
+  return  (
+    <button
+      onMouseEnter={() => setIsHover(true)}
+      onMouseLeave={() => setIsHover(false)}
+      key={descriptor}
+      className={`text-sm rounded-full ml-2 py-2 px-5 mt-1 text-left ${moodMap[mood]}`}
+      onClick={expungeFeeling}
+    >
+      {isHover && <span className='text-red-500 font-bold'>x </span>}
+      {descriptor}
+    </button>
+  )
 }
