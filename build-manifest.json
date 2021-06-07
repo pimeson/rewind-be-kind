@@ -1,0 +1,226 @@
+{
+  "inputs": {
+    "dist/env.js": {
+      "bytes": 97,
+      "imports": []
+    },
+    "dist/pkg/common/index-e66f0a38.js": {
+      "bytes": 8994,
+      "imports": []
+    },
+    "dist/pkg/react.js": {
+      "bytes": 353,
+      "imports": [
+        {
+          "path": "dist/pkg/common/index-e66f0a38.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/pkg/common/index-e66f0a38.js",
+          "kind": "import-statement"
+        }
+      ]
+    },
+    "dist/pkg/react-dom.js": {
+      "bytes": 127469,
+      "imports": [
+        {
+          "path": "dist/pkg/common/index-e66f0a38.js",
+          "kind": "import-statement"
+        }
+      ]
+    },
+    "dist/App.css": {
+      "bytes": 3421,
+      "imports": []
+    },
+    "dist/pkg/styled-components.js": {
+      "bytes": 52600,
+      "imports": [
+        {
+          "path": "dist/pkg/common/index-e66f0a38.js",
+          "kind": "import-statement"
+        }
+      ]
+    },
+    "dist/pkg/date-fns.js": {
+      "bytes": 93294,
+      "imports": []
+    },
+    "dist/DateContext.js": {
+      "bytes": 3646,
+      "imports": [
+        {
+          "path": "dist/pkg/react.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/pkg/date-fns.js",
+          "kind": "import-statement"
+        }
+      ]
+    },
+    "dist/Day.js": {
+      "bytes": 4816,
+      "imports": [
+        {
+          "path": "dist/pkg/react.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/pkg/date-fns.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/pkg/styled-components.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/DateContext.js",
+          "kind": "import-statement"
+        }
+      ]
+    },
+    "dist/hooks/useScreenWidth.js": {
+      "bytes": 424,
+      "imports": [
+        {
+          "path": "dist/pkg/react.js",
+          "kind": "import-statement"
+        }
+      ]
+    },
+    "dist/Week.js": {
+      "bytes": 1585,
+      "imports": [
+        {
+          "path": "dist/pkg/styled-components.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/pkg/react.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/DateContext.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/hooks/useScreenWidth.js",
+          "kind": "import-statement"
+        }
+      ]
+    },
+    "dist/App.js": {
+      "bytes": 2479,
+      "imports": [
+        {
+          "path": "dist/pkg/react.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/App.css",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/pkg/styled-components.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/Day.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/Week.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/DateContext.js",
+          "kind": "import-statement"
+        }
+      ]
+    },
+    "dist/index.js": {
+      "bytes": 562,
+      "imports": [
+        {
+          "path": "dist/env.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/pkg/react.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/pkg/react-dom.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/App.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "dist/DateContext.js",
+          "kind": "import-statement"
+        }
+      ]
+    }
+  },
+  "outputs": {
+    "../~~bundle~~/dist/index.js": {
+      "imports": [],
+      "exports": [],
+      "inputs": {
+        "dist/env.js": {
+          "bytesInOutput": 186
+        },
+        "dist/pkg/common/index-e66f0a38.js": {
+          "bytesInOutput": 11365
+        },
+        "dist/pkg/react.js": {
+          "bytesInOutput": 167
+        },
+        "dist/pkg/react-dom.js": {
+          "bytesInOutput": 195673
+        },
+        "dist/App.css": {
+          "bytesInOutput": 0
+        },
+        "dist/pkg/styled-components.js": {
+          "bytesInOutput": 59057
+        },
+        "dist/pkg/date-fns.js": {
+          "bytesInOutput": 46716
+        },
+        "dist/DateContext.js": {
+          "bytesInOutput": 3467
+        },
+        "dist/Day.js": {
+          "bytesInOutput": 4642
+        },
+        "dist/hooks/useScreenWidth.js": {
+          "bytesInOutput": 385
+        },
+        "dist/Week.js": {
+          "bytesInOutput": 1397
+        },
+        "dist/App.js": {
+          "bytesInOutput": 2262
+        },
+        "dist/index.js": {
+          "bytesInOutput": 301
+        }
+      },
+      "bytes": 326175
+    },
+    "../~~bundle~~/dist/index.css": {
+      "imports": [],
+      "inputs": {
+        "dist/App.css": {
+          "bytesInOutput": 4118
+        }
+      },
+      "bytes": 4137
+    }
+  }
+}
