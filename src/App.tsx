@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import styled from 'styled-components';
 import Day from './Day';
-import Week from './Week';
+import View from './View';
 import { daysOfTheWeek, useDate, useDateHandlers } from './DateContext';
 
 interface AppProps {}
@@ -59,7 +59,7 @@ function App({}: AppProps) {
       <h3 className="subtitle text-center mt-10 sm-mt-14 text-lg opacity-60 text-gray-600">
         {makePrompt(dayIndex)}
       </h3>
-      <Week month={month} year={year}>
+      <View month={month} year={year}>
         {days.map((day) => (
           <Day
             setMood={setMood}
@@ -69,7 +69,7 @@ function App({}: AppProps) {
             expungeFeeling={expungeFeeling}
           />
         ))}
-      </Week>
+      </View>
       {/*<div className="bg-white mx-12 shadow-2xl mb-10 rounded-xl" style={{gridArea: "goals"}}>*/}
       {/*  <h1></h1>*/}
       {/*</div>*/}

@@ -3,23 +3,23 @@ import React from 'react';
 import { useDateHandlers } from './DateContext';
 import useScreenWidth from './hooks/useScreenWidth';
 
-export const StyledWeek = styled.div`
+export const StyledView = styled.div`
   grid-area: base;
   display: grid;
   grid-template-rows: auto auto 1fr;
 `;
 
-interface WeekProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ViewProps extends React.HTMLAttributes<HTMLDivElement> {
   month: string;
   year: string;
 }
 
-export default function Week({ month, year, ...props }: WeekProps) {
+export default function View({ month, year, ...props }: ViewProps) {
   const { incrementWeek, decrementWeek } = useDateHandlers();
   const width = useScreenWidth();
 
   return (
-    <StyledWeek className="px-6 md:px-12 mb-5" {...props}>
+    <StyledView className="px-6 md:px-12 mb-5" {...props}>
       <div className="flex mx-1 justify-between">
         <button
           onClick={decrementWeek}
@@ -40,6 +40,6 @@ export default function Week({ month, year, ...props }: WeekProps) {
       <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 xl:grid-cols-7 mb-8 mt-3">
         {props.children}
       </div>
-    </StyledWeek>
+    </StyledView>
   );
 }

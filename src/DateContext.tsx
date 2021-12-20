@@ -22,66 +22,6 @@ interface IDateHandlersContext {
   expungeFeeling: (feeling: string, date: Date) => void;
 }
 
-export type Weekday = {
-  weekday: string;
-  date: Date;
-  log: Log | null;
-};
-
-export type Log = {
-  feelings: { [feeling: string]: Mood };
-  mood: Mood;
-  date: string;
-};
-
-export enum Mood {
-  happy = 'happy',
-  neutral = 'neutral',
-  sad = 'sad',
-}
-
-export const daysOfTheWeek = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday',
-];
-
-export const indexByDay = Object.entries(daysOfTheWeek).reduce<{
-  [day: string]: number;
-}>((map, [index, day]) => {
-  return { ...map, [day]: Number(index) };
-}, {});
-
-const makeWeekdays = (startDate: Date, logs: { [day: string]: Log }) => {
-  const weekday = format(startDate, 'eeee');
-  const todayIndex = indexByDay[weekday];
-
-  return Object.entries(indexByDay).reduce((days, [weekday, index]) => {
-    const date = add(startDate, {
-      days: index - todayIndex,
-    });
-    const existingLog = logs?.[format(date, 'yyyy-MM-dd')] ?? null;
-
-    return [
-      ...days,
-      {
-        weekday,
-        date,
-        log: existingLog,
-      },
-    ];
-  }, [] as Weekday[]);
-};
-
-const DateContext = createContext<IDateContext | undefined>(undefined);
-const DateHandlersContext = createContext<IDateHandlersContext | undefined>(
-  undefined,
-);
-
 export function DateProvider({ children }: PropsWithChildren<any>) {
   const [dailyLogs, setDailyLogs] = useState<{ [dateStamp: string]: Log }>({});
 
@@ -176,6 +116,68 @@ export function DateProvider({ children }: PropsWithChildren<any>) {
     </DateContext.Provider>
   );
 }
+
+export type Weekday = {
+  weekday: string;
+  date: Date;
+  log: Log | null;
+};
+
+export type Log = {
+  feelings: { [feeling: string]: Mood };
+  mood: Mood;
+  date: string;
+};
+
+export enum Mood {
+  happy = 'happy',
+  neutral = 'neutral',
+  sad = 'sad',
+}
+
+export const daysOfTheWeek = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+];
+
+export const indexByDay = Object.entries(daysOfTheWeek).reduce<{
+  [day: string]: number;
+}>((map, [index, day]) => {
+  return { ...map, [day]: Number(index) };
+}, {});
+
+const makeWeekdays = (startDate: Date, logs: { [day: string]: Log }) => {
+  const weekday = format(startDate, 'eeee');
+  const todayIndex = indexByDay[weekday];
+
+  return Object.entries(indexByDay).reduce((days, [weekday, index]) => {
+    const date = add(startDate, {
+      days: index - todayIndex,
+    });
+    const existingLog = logs?.[format(date, 'yyyy-MM-dd')] ?? null;
+
+    return [
+      ...days,
+      {
+        weekday,
+        date,
+        log: existingLog,
+      },
+    ];
+  }, [] as Weekday[]);
+};
+
+const DateContext = createContext<IDateContext | undefined>(undefined);
+const DateHandlersContext = createContext<IDateHandlersContext | undefined>(
+  undefined,
+);
+
+
 
 export function useDate() {
   const context = useContext(DateContext);
