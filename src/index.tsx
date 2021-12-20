@@ -6,7 +6,7 @@ import { DateProvider } from './DateContext';
 ReactDOM.render(
   <React.StrictMode>
     <DateProvider>
-     <App />
+      <App />
     </DateProvider>
   </React.StrictMode>,
   document.getElementById('root'),

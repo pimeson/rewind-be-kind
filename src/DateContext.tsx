@@ -1,19 +1,25 @@
-import React, { createContext, useContext, PropsWithChildren, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  PropsWithChildren,
+  useState,
+  useEffect,
+} from 'react';
 import { add, format } from 'date-fns';
 
 interface IDateContext {
-  weekday: string
-  month: string
-  year: string
-  days: Weekday[]
+  weekday: string;
+  month: string;
+  year: string;
+  days: Weekday[];
 }
 
-interface IDateHandlersContext{
-  incrementWeek: () => void
-  decrementWeek: () => void
-  setMood: (mood: Mood, date: Date) => void
-  setFeeling: (mood: Mood, descriptor: string[], date: Date) => void
-  expungeFeeling: (feeling: string, date: Date) => void
+interface IDateHandlersContext {
+  incrementWeek: () => void;
+  decrementWeek: () => void;
+  setMood: (mood: Mood, date: Date) => void;
+  setFeeling: (mood: Mood, descriptor: string[], date: Date) => void;
+  expungeFeeling: (feeling: string, date: Date) => void;
 }
 
 export type Weekday = {
@@ -23,15 +29,15 @@ export type Weekday = {
 };
 
 export type Log = {
-  feelings: {[feeling: string]: Mood};
+  feelings: { [feeling: string]: Mood };
   mood: Mood;
   date: string;
 };
 
 export enum Mood {
-  happy = "happy",
-  neutral = "neutral",
-  sad = "sad",
+  happy = 'happy',
+  neutral = 'neutral',
+  sad = 'sad',
 }
 
 export const daysOfTheWeek = [
@@ -72,7 +78,9 @@ const makeWeekdays = (startDate: Date, logs: { [day: string]: Log }) => {
 };
 
 const DateContext = createContext<IDateContext | undefined>(undefined);
-const DateHandlersContext = createContext<IDateHandlersContext | undefined>( undefined);
+const DateHandlersContext = createContext<IDateHandlersContext | undefined>(
+  undefined,
+);
 
 export function DateProvider({ children }: PropsWithChildren<any>) {
   const [dailyLogs, setDailyLogs] = useState<{ [dateStamp: string]: Log }>({});
@@ -100,10 +108,13 @@ export function DateProvider({ children }: PropsWithChildren<any>) {
   };
 
   const setFeeling = (mood: Mood, descriptors: string[], date: Date) => {
-    const formattedDate = format(date, 'yyyy-MM-dd')
-    const prevLog = dailyLogs[formattedDate]
-    const prevFeelings = prevLog?.feelings ?? {}
-    const feelings = descriptors.reduce<{[feeling: string]: Mood}>((acc, d) => ({ ...acc, [d]: mood }), prevFeelings)
+    const formattedDate = format(date, 'yyyy-MM-dd');
+    const prevLog = dailyLogs[formattedDate];
+    const prevFeelings = prevLog?.feelings ?? {};
+    const feelings = descriptors.reduce<{ [feeling: string]: Mood }>(
+      (acc, d) => ({ ...acc, [d]: mood }),
+      prevFeelings,
+    );
 
     setDailyLogs({
       ...dailyLogs,
@@ -115,9 +126,9 @@ export function DateProvider({ children }: PropsWithChildren<any>) {
   };
 
   const expungeFeeling = (feeling: string, date: Date) => {
-    const formattedDate = format(date, 'yyyy-MM-dd')
-    const prevLog = dailyLogs[formattedDate]
-    const {[feeling]: prevFeeling, ...rest} = prevLog.feelings
+    const formattedDate = format(date, 'yyyy-MM-dd');
+    const prevLog = dailyLogs[formattedDate];
+    const { [feeling]: prevFeeling, ...rest } = prevLog.feelings;
 
     setDailyLogs({
       ...dailyLogs,
@@ -128,13 +139,13 @@ export function DateProvider({ children }: PropsWithChildren<any>) {
     });
   };
 
-  const [startingDate, setStartingDate] = useState<Date>(new Date())
+  const [startingDate, setStartingDate] = useState<Date>(new Date());
 
-  function decrementWeek(){
-    setStartingDate(add(startingDate, {days: -7}))
+  function decrementWeek() {
+    setStartingDate(add(startingDate, { days: -7 }));
   }
-  function incrementWeek(){
-    setStartingDate(add(startingDate, {days: 7}))
+  function incrementWeek() {
+    setStartingDate(add(startingDate, { days: 7 }));
   }
 
   const weekday = format(startingDate, 'eeee');
@@ -143,39 +154,43 @@ export function DateProvider({ children }: PropsWithChildren<any>) {
   const days = makeWeekdays(startingDate, dailyLogs);
 
   return (
-    <DateContext.Provider value={{
-      weekday,
-      month,
-      year,
-      days
-    }}>
-      <DateHandlersContext.Provider value={{
-        decrementWeek,
-        incrementWeek,
-        setMood,
-        setFeeling,
-        expungeFeeling
-      }}>
+    <DateContext.Provider
+      value={{
+        weekday,
+        month,
+        year,
+        days,
+      }}
+    >
+      <DateHandlersContext.Provider
+        value={{
+          decrementWeek,
+          incrementWeek,
+          setMood,
+          setFeeling,
+          expungeFeeling,
+        }}
+      >
         {children}
       </DateHandlersContext.Provider>
     </DateContext.Provider>
-  )
+  );
 }
 
 export function useDate() {
-  const context = useContext(DateContext)
+  const context = useContext(DateContext);
   if (context === undefined) {
-    throw new Error(`useDate must be used within a DateProvider`)
+    throw new Error(`useDate must be used within a DateProvider`);
   }
 
-  return context
+  return context;
 }
 
 export function useDateHandlers() {
-  const context = useContext(DateHandlersContext)
+  const context = useContext(DateHandlersContext);
   if (context === undefined) {
-    throw new Error(`useDateHandlers must be used within a DateProvider`)
+    throw new Error(`useDateHandlers must be used within a DateProvider`);
   }
 
-  return context
+  return context;
 }

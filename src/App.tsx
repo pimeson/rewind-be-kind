@@ -36,18 +36,9 @@ const makePrompt = (todayIndex: number) => {
 };
 
 function App({}: AppProps) {
-  const {
-    weekday,
-    month,
-    year,
-    days
-  } = useDate()
+  const { weekday, month, year, days } = useDate();
 
-  const {
-    setMood,
-    setFeeling,
-    expungeFeeling
-  } = useDateHandlers()
+  const { setMood, setFeeling, expungeFeeling } = useDateHandlers();
 
   const dayIndex = indexByDay[weekday];
 
@@ -55,7 +46,7 @@ function App({}: AppProps) {
     <StyledApp className="bg-gray-100 antialiased text-gray-800">
       <div className="py-6" style={{ gridArea: 'title' }}>
         <div className="relative py-3 sm:max-w-xl sm:mx-auto">
-          <div className='absolute inset-0 bg-gradient-to-r from-cyan-400 to-light-blue-500 bg-red-300 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 rounded-3xl'/>
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-light-blue-500 bg-red-300 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 rounded-3xl" />
           <div className="relative bg-white shadow-lg rounded-3xl">
             <h1 className="font-sans font-semibold text-center w-full text-3xl text-gray-500 p-10">
               <span className="text-blue-400">Rewind</span> and{' '}
@@ -70,7 +61,13 @@ function App({}: AppProps) {
       </h3>
       <Week month={month} year={year}>
         {days.map((day) => (
-          <Day setMood={setMood} key={day.weekday} day={day} setFeeling={setFeeling} expungeFeeling={expungeFeeling} />
+          <Day
+            setMood={setMood}
+            key={day.weekday}
+            day={day}
+            setFeeling={setFeeling}
+            expungeFeeling={expungeFeeling}
+          />
         ))}
       </Week>
       {/*<div className="bg-white mx-12 shadow-2xl mb-10 rounded-xl" style={{gridArea: "goals"}}>*/}
