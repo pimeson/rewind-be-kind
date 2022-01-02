@@ -5,7 +5,11 @@ import React, {
   useState,
   useEffect,
 } from 'react';
-import { add, format } from 'date-fns';
+import startOfMonth from 'date-fns/startOfMonth'
+import add from 'date-fns/add'
+import format from 'date-fns/format'
+import getDay from 'date-fns/getDay';
+
 
 interface IDateContext {
   weekday: string;
@@ -14,16 +18,32 @@ interface IDateContext {
   days: Weekday[];
 }
 
+export enum Interval {
+  DAY = 'DAY',
+  WEEK = 'WEEK',
+  MONTH = 'MONTH'
+}
+
+function getIntervalDayLength(interval: Interval, daysInMonth: number): number {
+  switch (interval) {
+    case Interval.MONTH: return daysInMonth
+    case Interval.WEEK: return 7
+    default: return 1
+  }
+}
+
 interface IDateHandlersContext {
-  incrementWeek: () => void;
-  decrementWeek: () => void;
+  currentInterval: Interval;
+  incrementInterval: () => void;
+  decrementInterval: () => void;
   setMood: (mood: Mood, date: Date) => void;
   setFeeling: (mood: Mood, descriptor: string[], date: Date) => void;
   expungeFeeling: (feeling: string, date: Date) => void;
 }
 
-export function DateProvider({ children }: PropsWithChildren<any>) {
+export function DateProvider(props: PropsWithChildren<{}>) {
   const [dailyLogs, setDailyLogs] = useState<{ [dateStamp: string]: Log }>({});
+  const [interval, setInterval] = useState<Interval>(Interval.MONTH)
 
   useEffect(() => {
     const previousRecords = localStorage.getItem('records');
@@ -80,18 +100,22 @@ export function DateProvider({ children }: PropsWithChildren<any>) {
   };
 
   const [startingDate, setStartingDate] = useState<Date>(new Date());
+  const currentMonth = startingDate.getMonth();
+  const currentYear = startingDate.getFullYear();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const intervalDayLength = getIntervalDayLength(interval, daysInMonth);
 
-  function decrementWeek() {
-    setStartingDate(add(startingDate, { days: -7 }));
+  function decrementInterval() {
+    setStartingDate(add(startingDate, { days: -intervalDayLength }));
   }
-  function incrementWeek() {
-    setStartingDate(add(startingDate, { days: 7 }));
+  function incrementInterval() {
+    setStartingDate(add(startingDate, { days: intervalDayLength }));
   }
 
   const weekday = format(startingDate, 'eeee');
   const month = format(startingDate, 'MMMM');
   const year = format(startingDate, 'yyyy');
-  const days = makeWeekdays(startingDate, dailyLogs);
+  const days = makeWeekdays(startingDate, intervalDayLength, dailyLogs);
 
   return (
     <DateContext.Provider
@@ -104,14 +128,15 @@ export function DateProvider({ children }: PropsWithChildren<any>) {
     >
       <DateHandlersContext.Provider
         value={{
-          decrementWeek,
-          incrementWeek,
+          currentInterval: interval,
+          decrementInterval,
+          incrementInterval,
           setMood,
           setFeeling,
           expungeFeeling,
         }}
       >
-        {children}
+        {props.children}
       </DateHandlersContext.Provider>
     </DateContext.Provider>
   );
@@ -143,7 +168,7 @@ export const daysOfTheWeek = [
   'Friday',
   'Saturday',
   'Sunday',
-];
+] as const;
 
 export const indexByDay = Object.entries(daysOfTheWeek).reduce<{
   [day: string]: number;
@@ -151,33 +176,51 @@ export const indexByDay = Object.entries(daysOfTheWeek).reduce<{
   return { ...map, [day]: Number(index) };
 }, {});
 
-const makeWeekdays = (startDate: Date, logs: { [day: string]: Log }) => {
-  const weekday = format(startDate, 'eeee');
-  const todayIndex = indexByDay[weekday];
+const makeWeekdays = (startDate: Date, interval: number, logs: { [day: string]: Log }) => {
+  const newDays: Weekday[] = [];
 
-  return Object.entries(indexByDay).reduce((days, [weekday, index]) => {
-    const date = add(startDate, {
-      days: index - todayIndex,
-    });
-    const existingLog = logs?.[format(date, 'yyyy-MM-dd')] ?? null;
+  if (interval === 7) {
+    for (let i = 0; i < interval; i++) {  
+      const date = add(startDate, {
+        days: i,
+      });
+      const existingLog = logs?.[format(date, 'yyyy-MM-dd')] ?? null;
+  
+      newDays.push(
+        {
+          weekday: daysOfTheWeek[getDay(date)],
+          date,
+          log: existingLog,
+        })
+    }
 
-    return [
-      ...days,
-      {
-        weekday,
-        date,
-        log: existingLog,
-      },
-    ];
-  }, [] as Weekday[]);
+    return newDays
+  }
+  
+
+  for (let i = 0; i < interval; i++) {
+      const monthStart = startOfMonth(startDate)
+  
+      const date = add(monthStart, {
+        days: i,
+      });
+      const existingLog = logs?.[format(date, 'yyyy-MM-dd')] ?? null;
+  
+      newDays.push(
+        {
+          weekday: daysOfTheWeek[getDay(date)],
+          date,
+          log: existingLog,
+        })
+  }
+
+  return newDays
 };
 
 const DateContext = createContext<IDateContext | undefined>(undefined);
 const DateHandlersContext = createContext<IDateHandlersContext | undefined>(
   undefined,
 );
-
-
 
 export function useDate() {
   const context = useContext(DateContext);

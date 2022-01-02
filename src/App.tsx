@@ -38,7 +38,7 @@ const makePrompt = (todayIndex: number) => {
 function App({}: AppProps) {
   const { weekday, month, year, days } = useDate();
 
-  const { setMood, setFeeling, expungeFeeling } = useDateHandlers();
+  const { setMood, setFeeling, expungeFeeling, currentInterval } = useDateHandlers();
 
   const dayIndex = indexByDay[weekday];
 
@@ -59,11 +59,11 @@ function App({}: AppProps) {
       <h3 className="subtitle text-center mt-10 sm-mt-14 text-lg opacity-60 text-gray-600">
         {makePrompt(dayIndex)}
       </h3>
-      <View month={month} year={year}>
+      <View interval={currentInterval} month={month} year={year}>
         {days.map((day) => (
           <Day
             setMood={setMood}
-            key={day.weekday}
+            key={day.date.getDate()}
             day={day}
             setFeeling={setFeeling}
             expungeFeeling={expungeFeeling}
