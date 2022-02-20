@@ -21,7 +21,7 @@ export default function View({ month, year, interval, ...props }: ViewProps) {
   const width = useScreenWidth();
 
   return (
-    <StyledView className="px-6 md:px-12 mb-5" {...props}>
+    <StyledView className="px-12 md:px-24 mb-5" {...props}>
       <div className="flex mx-1 justify-between">
         <button
           onClick={decrementInterval}

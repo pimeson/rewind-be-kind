@@ -69,7 +69,7 @@ export default function Day({
 
   let className = overrideClassNames
     ? overrideClassNames
-    : 'flex flex-col bg-white h-96 rounded-lg shadow-md';
+    : 'flex flex-col bg-white h-72 rounded-lg shadow-md';
 
   if (isToday(date)) {
     className += ' border-4 border-red-700 border-opacity-25';

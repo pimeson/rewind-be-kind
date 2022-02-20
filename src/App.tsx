@@ -63,7 +63,7 @@ function App({}: AppProps) {
         {days.map((day) => (
           <Day
             setMood={setMood}
-            key={day.date.getDate()}
+            key={`${day.date.getMonth()}-${day.date.getDate()}`}
             day={day}
             setFeeling={setFeeling}
             expungeFeeling={expungeFeeling}

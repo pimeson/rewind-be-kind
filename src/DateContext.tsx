@@ -9,6 +9,7 @@ import startOfMonth from 'date-fns/startOfMonth'
 import add from 'date-fns/add'
 import format from 'date-fns/format'
 import getDay from 'date-fns/getDay';
+import { subtract } from 'lodash';
 
 
 interface IDateContext {
@@ -115,7 +116,7 @@ export function DateProvider(props: PropsWithChildren<{}>) {
   const weekday = format(startingDate, 'eeee');
   const month = format(startingDate, 'MMMM');
   const year = format(startingDate, 'yyyy');
-  const days = makeWeekdays(startingDate, intervalDayLength, dailyLogs);
+  const days = makeDays(startingDate, intervalDayLength, dailyLogs);
 
   return (
     <DateContext.Provider
@@ -176,8 +177,9 @@ export const indexByDay = Object.entries(daysOfTheWeek).reduce<{
   return { ...map, [day]: Number(index) };
 }, {});
 
-const makeWeekdays = (startDate: Date, interval: number, logs: { [day: string]: Log }) => {
+const makeDays = (startDate: Date, interval: number, logs: { [day: string]: Log }) => {
   const newDays: Weekday[] = [];
+
 
   if (interval === 7) {
     for (let i = 0; i < interval; i++) {  
@@ -196,14 +198,28 @@ const makeWeekdays = (startDate: Date, interval: number, logs: { [day: string]: 
 
     return newDays
   }
-  
 
-  for (let i = 0; i < interval; i++) {
-      const monthStart = startOfMonth(startDate)
-  
+  const monthStart = startOfMonth(startDate)
+
+  for (let j = 1; j <= getDay(monthStart); j++) {
+    const date = add(monthStart, {
+      days: -j,
+    });
+
+    const existingLog = logs?.[format(date, 'yyyy-MM-dd')] ?? null;
+
+    newDays.unshift({
+      weekday: daysOfTheWeek[getDay(date)],
+      date,
+      log: existingLog,
+    })
+  }
+
+  for (let j = 0; j < interval; j++) {
       const date = add(monthStart, {
-        days: i,
+        days: j,
       });
+
       const existingLog = logs?.[format(date, 'yyyy-MM-dd')] ?? null;
   
       newDays.push(
@@ -212,6 +228,24 @@ const makeWeekdays = (startDate: Date, interval: number, logs: { [day: string]: 
           date,
           log: existingLog,
         })
+  }
+
+  const lastDay = newDays[newDays.length - 1]
+
+
+  for (let j = 0; j < (6 - getDay(lastDay.date)); j++) {
+    const date = add(monthStart, {
+      days: interval + j,
+    });
+
+    const existingLog = logs?.[format(date, 'yyyy-MM-dd')] ?? null;
+
+    newDays.push(
+      {
+        weekday: daysOfTheWeek[getDay(date)],
+        date,
+        log: existingLog,
+      })
   }
 
   return newDays
